@@ -1,25 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { signUp } from "@/lib/auth";
+import { signIn } from "@/lib/auth";
 
-export default function SignupPage() {
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  async function handleSignup() {
-    const { error } = await signUp(email, password);
+  async function handleLogin() {
+    const { error } = await signIn(email, password);
 
     if (error) {
       alert(error.message);
     } else {
-      alert("✅ Account created! Check your email.");
+      window.location.href = "/dashboard";
     }
   }
 
   return (
     <main className="max-w-md mx-auto p-10">
-      <h1 className="text-4xl font-bold mb-6">Create Account</h1>
+      <h1 className="text-4xl font-bold mb-6">Login</h1>
 
       <input
         type="email"
@@ -38,10 +38,10 @@ export default function SignupPage() {
       />
 
       <button
-        onClick={handleSignup}
+        onClick={handleLogin}
         className="w-full bg-black text-white p-3 rounded"
       >
-        Create Account
+        Login
       </button>
     </main>
   );

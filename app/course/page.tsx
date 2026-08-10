@@ -28,8 +28,8 @@ export default function CoursePage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto p-10">
-      <h1 className="text-4xl font-bold mb-8">💰 Create Course</h1>
+    <main className="max-w-xl mx-auto mt-10">
+      <h1 className="text-3xl font-bold mb-6">💰 Create Course</h1>
 
       <input
         className="w-full border p-3 rounded mb-4"
@@ -61,4 +61,4 @@ export default function CoursePage() {
       </button>
     </main>
   );
-} 
+}
