@@ -53,14 +53,44 @@ export default function DashboardPage() {
     alert("✅ Course deleted!");
   }
 
+  async function togglePublish(
+    id: number,
+    currentStatus: boolean
+  ) {
+    const { error } = await supabase
+      .from("courses")
+      .update({
+        published: !currentStatus,
+      })
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setCourses(
+      courses.map((course) =>
+        course.id === id
+          ? {
+              ...course,
+              published: !currentStatus,
+            }
+          : course
+      )
+    );
+  }
+
   async function handleLogout() {
     await signOut();
     window.location.href = "/login";
   }
 
   return (
-    <main className="max-w-4xl mx-auto p-10">
-      <h1 className="text-5xl font-bold mb-4">Dashboard</h1>
+    <main className="max-w-5xl mx-auto p-10">
+      <h1 className="text-5xl font-bold mb-4">
+        Dashboard
+      </h1>
 
       <p className="text-gray-500 mb-6">
         Welcome to FlowOS Creator Dashboard
@@ -73,7 +103,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">My Courses</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          My Courses
+        </h2>
 
         {courses.length === 0 ? (
           <p>No courses yet.</p>
@@ -82,24 +114,79 @@ export default function DashboardPage() {
             {courses.map((course) => (
               <div
                 key={course.id}
-                className="border p-4 rounded"
+                className="border p-4 rounded-lg shadow"
               >
-                <h3 className="font-bold text-lg">
+                {course.thumbnail && (
+                  <img
+                    src={course.thumbnail}
+                    alt={course.title}
+                    className="w-full h-48 object-cover rounded mb-4"
+                  />
+                )}
+
+                <h3 className="font-bold text-xl">
                   {course.title}
                 </h3>
 
-                <p>{course.description}</p>
-
                 <p className="mt-2">
+                  {course.published ? (
+                    <span className="text-green-600 font-bold">
+                      ✅ Published
+                    </span>
+                  ) : (
+                    <span className="text-yellow-600 font-bold">
+                      📝 Draft
+                    </span>
+                  )}
+                </p>
+
+                <p className="text-gray-600 mt-2">
+                  {course.description}
+                </p>
+
+                <p className="mt-3 font-bold text-green-600">
                   ₹{course.price}
                 </p>
 
-                <button
-                  onClick={() => deleteCourse(course.id)}
-                  className="mt-3 bg-red-600 text-white px-3 py-2 rounded"
-                >
-                  Delete
-                </button>
+                <div className="flex gap-3 mt-4">
+                  <a
+                    href={`/course/${course.id}`}
+                    target="_blank"
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                  >
+                    View
+                  </a>
+
+                  <a
+                    href={`/course/edit/${course.id}`}
+                    className="bg-yellow-500 text-white px-4 py-2 rounded"
+                  >
+                    Edit
+                  </a>
+
+                  <button
+                    onClick={() =>
+                      togglePublish(
+                        course.id,
+                        course.published
+                      )
+                    }
+                    className="bg-green-600 text-white px-4 py-2 rounded"
+                  >
+                    {course.published
+                      ? "Unpublish"
+                      : "Publish"}
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      deleteCourse(course.id)
+                    }
+                    className="bg-red-600 text-white px-4 py-2 rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
