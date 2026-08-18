@@ -86,6 +86,23 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-800 py-8">
+        <div className="mx-auto max-w-6xl px-6 flex flex-wrap justify-center gap-6 text-slate-400">
+          <Link href="/about" className="hover:text-white">
+            About
+          </Link>
+
+          <Link href="/contact" className="hover:text-white">
+            Contact
+          </Link>
+
+          <span>
+            © 2026 FlowOS. All rights reserved.
+          </span>
+        </div>
+      </footer>
     </main>
   );
 }
