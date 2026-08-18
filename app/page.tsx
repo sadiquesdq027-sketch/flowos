@@ -98,6 +98,14 @@ export default function Home() {
             Contact
           </Link>
 
+          <Link href="/privacy" className="hover:text-white">
+            Privacy Policy
+          </Link>
+
+          <Link href="/terms" className="hover:text-white">
+            Terms & Conditions
+          </Link>
+
           <span>
             © 2026 FlowOS. All rights reserved.
           </span>
