@@ -28,6 +28,51 @@ export default function CourseDetailsPage({
     loadCourse();
   }, [id]);
 
+  async function handlePayment() {
+    try {
+      const response = await fetch(
+        "/api/razorpay/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: course.price * 100,
+          }),
+        }
+      );
+
+      const order = await response.json();
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "FlowOS",
+        description: course.title,
+        order_id: order.id,
+
+        handler: function () {
+          alert("✅ Payment Successful!");
+        },
+
+        theme: {
+          color: "#2563eb",
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(
+        options
+      );
+
+      razorpay.open();
+    } catch (error) {
+      console.error(error);
+      alert("Payment failed");
+    }
+  }
+
   if (loading) {
     return (
       <main className="max-w-3xl mx-auto p-10">
@@ -74,7 +119,10 @@ export default function CourseDetailsPage({
         ₹{course.price}
       </p>
 
-      <button className="bg-green-600 text-white px-6 py-3 rounded">
+      <button
+        onClick={handlePayment}
+        className="bg-green-600 text-white px-6 py-3 rounded"
+      >
         Buy Now
       </button>
     </main>
