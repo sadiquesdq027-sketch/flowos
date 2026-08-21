@@ -53,9 +53,27 @@ export default function CourseDetailsPage({
         description: course.title,
         order_id: order.id,
 
-        handler: function () {
-          alert("✅ Payment Successful!");
-        },
+        handler: async function (response: any) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  await fetch("/api/save-purchase", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      user_id: user?.id,
+      course_id: course.id,
+      amount: course.price,
+      payment_id:
+        response.razorpay_payment_id,
+    }),
+  });
+
+  window.location.href = "/thank-you";
+},
 
         theme: {
           color: "#2563eb",
