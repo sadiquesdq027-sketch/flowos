@@ -84,3 +84,16 @@ export default function MyPurchasesPage() {
     </main>
   );
 }
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+console.log("USER:", user);
+
+const { data, error } = await supabase
+  .from("purchases")
+  .select("*")
+  .eq("user_id", user?.id);
+
+console.log("PURCHASES:", data);
+console.log("ERROR:", error);
