@@ -107,8 +107,7 @@ export default function DashboardPage() {
 
       <div className="border p-4 rounded mb-6">
         <p>
-          <strong>Logged in as:</strong>{" "}
-          {email}
+          <strong>Logged in as:</strong> {email}
         </p>
       </div>
 
@@ -116,6 +115,13 @@ export default function DashboardPage() {
         <h2 className="text-2xl font-bold mb-4">
           My Courses
         </h2>
+
+        <a
+          href="/course"
+          className="inline-block bg-blue-600 text-white px-5 py-3 rounded-lg mb-6"
+        >
+          + Create New Course
+        </a>
 
         {courses.length === 0 ? (
           <p>No courses yet.</p>
