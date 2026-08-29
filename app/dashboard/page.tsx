@@ -14,16 +14,23 @@ export default function DashboardPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (user) {
-        setEmail(user.email || "");
+      if (!user) {
+        return;
       }
 
-      const { data } = await supabase
+      setEmail(user.email || "");
+
+      const { data, error } = await supabase
         .from("courses")
         .select("*")
-        .order("created_at", { ascending: false });
+        .eq("creator_id", user.id)
+        .order("created_at", {
+          ascending: false,
+        });
 
-      setCourses(data || []);
+      if (!error) {
+        setCourses(data || []);
+      }
     }
 
     loadData();
@@ -47,7 +54,9 @@ export default function DashboardPage() {
     }
 
     setCourses(
-      courses.filter((course) => course.id !== id)
+      courses.filter(
+        (course) => course.id !== id
+      )
     );
 
     alert("✅ Course deleted!");
@@ -98,7 +107,8 @@ export default function DashboardPage() {
 
       <div className="border p-4 rounded mb-6">
         <p>
-          <strong>Logged in as:</strong> {email}
+          <strong>Logged in as:</strong>{" "}
+          {email}
         </p>
       </div>
 

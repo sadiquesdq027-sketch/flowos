@@ -10,6 +10,15 @@ export default function CoursePage() {
   const [thumbnail, setThumbnail] = useState<File | null>(null);
 
   async function saveCourse() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("Please login first");
+      return;
+    }
+
     let thumbnailUrl = "";
 
     if (thumbnail) {
@@ -31,14 +40,17 @@ export default function CoursePage() {
       thumbnailUrl = data.publicUrl;
     }
 
-    const { error } = await supabase.from("courses").insert([
-      {
-        title,
-        description,
-        price: Number(price),
-        thumbnail: thumbnailUrl,
-      },
-    ]);
+    const { error } = await supabase
+      .from("courses")
+      .insert([
+        {
+          creator_id: user.id,
+          title,
+          description,
+          price: Number(price),
+          thumbnail: thumbnailUrl,
+        },
+      ]);
 
     if (error) {
       alert(error.message);
