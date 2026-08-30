@@ -8,6 +8,7 @@ export default function CoursePage() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [productFile, setProductFile] = useState<File | null>(null);
 
   async function saveCourse() {
     const {
@@ -20,7 +21,9 @@ export default function CoursePage() {
     }
 
     let thumbnailUrl = "";
+    let fileUrl = "";
 
+    // Upload Thumbnail
     if (thumbnail) {
       const fileName = `${Date.now()}-${thumbnail.name}`;
 
@@ -40,6 +43,26 @@ export default function CoursePage() {
       thumbnailUrl = data.publicUrl;
     }
 
+    // Upload PDF / Ebook
+    if (productFile) {
+      const fileName = `${Date.now()}-${productFile.name}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("products")
+        .upload(fileName, productFile);
+
+      if (uploadError) {
+        alert(uploadError.message);
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from("products")
+        .getPublicUrl(fileName);
+
+      fileUrl = data.publicUrl;
+    }
+
     const { error } = await supabase
       .from("courses")
       .insert([
@@ -49,29 +72,32 @@ export default function CoursePage() {
           description,
           price: Number(price),
           thumbnail: thumbnailUrl,
+          file_url: fileUrl,
         },
       ]);
 
     if (error) {
       alert(error.message);
     } else {
-      alert("✅ Course Saved Successfully!");
+      alert("✅ Product Saved Successfully!");
+
       setTitle("");
       setDescription("");
       setPrice("");
       setThumbnail(null);
+      setProductFile(null);
     }
   }
 
   return (
     <main className="max-w-2xl mx-auto p-10">
       <h1 className="text-4xl font-bold mb-6">
-        💰 Create Course
+        🚀 Create Product
       </h1>
 
       <input
         className="w-full border p-3 rounded mb-4"
-        placeholder="Course Title"
+        placeholder="Product Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
@@ -91,6 +117,10 @@ export default function CoursePage() {
         onChange={(e) => setPrice(e.target.value)}
       />
 
+      <label className="block mb-2 font-medium">
+        Thumbnail Image
+      </label>
+
       <input
         type="file"
         accept="image/*"
@@ -100,11 +130,24 @@ export default function CoursePage() {
         className="w-full border p-3 rounded mb-6"
       />
 
+      <label className="block mb-2 font-medium">
+        Upload PDF / Ebook
+      </label>
+
+      <input
+        type="file"
+        accept=".pdf"
+        onChange={(e) =>
+          setProductFile(e.target.files?.[0] || null)
+        }
+        className="w-full border p-3 rounded mb-6"
+      />
+
       <button
         onClick={saveCourse}
         className="bg-blue-600 text-white px-6 py-3 rounded-lg"
       >
-        Publish Course
+        Publish Product
       </button>
     </main>
   );
