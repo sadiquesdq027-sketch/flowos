@@ -1,48 +1,43 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-export default function EditCoursePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
-
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [loading, setLoading] = useState(true);
+export default function DashboardPage() {
+  const [courses, setCourses] = useState<any[]>([]);
 
   useEffect(() => {
-    async function loadCourse() {
-      const { data } = await supabase
-        .from("courses")
-        .select("*")
-        .eq("id", id)
-        .single();
+    loadCourses();
+  }, []);
 
-      if (data) {
-        setTitle(data.title || "");
-        setDescription(data.description || "");
-        setPrice(String(data.price || ""));
-      }
+  async function loadCourses() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      setLoading(false);
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("creator_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (!error) {
+      setCourses(data || []);
     }
+  }
 
-    loadCourse();
-  }, [id]);
+  async function deleteCourse(id: number) {
+    const confirmed = confirm(
+      "Are you sure you want to delete this product?"
+    );
 
-  async function updateCourse() {
+    if (!confirmed) return;
+
     const { error } = await supabase
       .from("courses")
-      .update({
-        title,
-        description,
-        price: Number(price),
-      })
+      .delete()
       .eq("id", id);
 
     if (error) {
@@ -50,59 +45,67 @@ export default function EditCoursePage({
       return;
     }
 
-    alert("✅ Course Updated!");
-  }
-
-  if (loading) {
-    return (
-      <main className="max-w-3xl mx-auto p-10">
-        <h1 className="text-2xl font-bold">
-          Loading...
-        </h1>
-      </main>
+    setCourses(
+      courses.filter(
+        (course) => course.id !== id
+      )
     );
+
+    alert("✅ Product deleted successfully!");
   }
 
   return (
-    <main className="max-w-3xl mx-auto p-10">
+    <main className="max-w-5xl mx-auto p-10">
       <h1 className="text-4xl font-bold mb-8">
-        ✏️ Edit Course
+        📦 My Products
       </h1>
 
-      <input
-        className="w-full border p-3 rounded mb-4"
-        placeholder="Course Title"
-        value={title}
-        onChange={(e) =>
-          setTitle(e.target.value)
-        }
-      />
+      <div className="grid gap-6">
+        {courses.map((course) => (
+          <div
+            key={course.id}
+            className="border rounded-xl p-5 shadow"
+          >
+            {course.thumbnail && (
+              <img
+                src={course.thumbnail}
+                alt={course.title}
+                className="w-full h-52 object-cover rounded mb-4"
+              />
+            )}
 
-      <textarea
-        className="w-full border p-3 rounded mb-4"
-        placeholder="Description"
-        value={description}
-        onChange={(e) =>
-          setDescription(e.target.value)
-        }
-      />
+            <h2 className="text-2xl font-semibold">
+              {course.title}
+            </h2>
 
-      <input
-        type="number"
-        className="w-full border p-3 rounded mb-6"
-        placeholder="Price"
-        value={price}
-        onChange={(e) =>
-          setPrice(e.target.value)
-        }
-      />
+            <p className="text-gray-600 mt-2">
+              {course.description}
+            </p>
 
-      <button
-        onClick={updateCourse}
-        className="bg-green-600 text-white px-6 py-3 rounded"
-      >
-        Save Changes
-      </button>
+            <p className="mt-3 font-bold text-green-600">
+              ₹{course.price}
+            </p>
+
+            <div className="flex gap-3 mt-4">
+              <a
+                href={`/course/edit/${course.id}`}
+                className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
+              >
+                ✏️ Edit Product
+              </a>
+
+              <button
+                onClick={() =>
+                  deleteCourse(course.id)
+                }
+                className="bg-red-600 text-white px-4 py-2 rounded-lg"
+              >
+                🗑️ Delete Product
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }
